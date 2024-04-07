@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h1 class="text-center"> Allen Aspire Mentor Log </h1>
+<div class="container">
+    <table class="table table-hover" style="vertical-align: middle;">
+        <tr>
+            <th></th>
+            <th width="20%">Mentor 1</th>
+            <th width="20%">Mentor 2</th>
+            <th width="20%">Mentor 3</th>
+            <th width="20%">Mentor 4</th>
+        </tr>
+        {% for entry in log %}
+        <tr>
+            <th>{{ entry.date.strftime('%A, %B %d') }}</th>
+            {% for i in range(1,5) %}
+                {% set mentor = 'mentor'+i|string %}
+                {% if entry[mentor] %}
+                    <td>
+                        <span class="popovers" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="{{entry[mentor]}}" data-bs-placement="bottom">{{ entry[mentor]|truncate(20) }}</span>
+                        <button style="vertical-align: middle;" class="btn-close" data-bs-toggle="modal" data-bs-target="#remove" data-bs-src="{{ entry._id~' '~mentor }}">
+                    </td>
+                {% else %}
+                    <td>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#signup" data-bs-src="{{ entry._id~' '~mentor }}">Sign Up!</button>
+                    </td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div class="modal fade" id="signup" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5">Sign Up!</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/signup" method="post">
+                <input type="hidden" id="id" name="id" value="">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="mentor-name" class="col-form-label">Mentor:</label>
+                        <input type="text" class="form-control" id="mentor-name" name="mentor-name" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="col-form-label">Password:</label>
+                        <input type="text" class="form-control" id="password" name="password" placeholder="Password">
+                        <small id="password" class="form-text text-muted">In case you want to remove your name later; applies only to this slot</small>
+                    </div>          
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit button" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+          </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="remove" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5">Remove Sign Up</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+            </div>
+            <form action="/remove" method="post">
+                <input type="hidden" id="id" name="id" value="">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="password" class="col-form-label">Password:</label>
+                        <input type="text" class="form-control" id="password" name="password" placeholder="Password">
+                    </div>          
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit button" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+          </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="incToast" class="toast text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-body">
+            Incorrect password.
+          </div>
+        </div>
+      </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+<script>
+    const popovers = [...document.getElementsByClassName("popovers")].map(popover => new bootstrap.Popover(popover));
+    const toasts = [...document.querySelectorAll(".toast")].map(toast => new bootstrap.Toast(toast));
+
+    {% if wrongpwd %}
+        bootstrap.Toast.getInstance("#incToast").show()
+    {% endif %}
+
+
+    // Fill hidden field on button click
+    const signupModal = document.getElementById('signup');
+    if (signupModal) {
+        signupModal.addEventListener('show.bs.modal', event => {
+            // Button that triggered the modal
+            const button = event.relatedTarget;
+            console.log(button);
+            const dbid = button.getAttribute('data-bs-src');
+            const hiddenfield = signupModal.querySelector('#id');
+            console.log(dbid);
+            hiddenfield.value = dbid;
+        })
+    }
+
+    const removeModal = document.getElementById('remove');
+    if (removeModal) {
+        removeModal.addEventListener('show.bs.modal', event => {
+            // Button that triggered the modal
+            const button = event.relatedTarget;
+            console.log(button);
+            const dbid = button.getAttribute('data-bs-src');
+            const hiddenfield = removeModal.querySelector('#id');
+            hiddenfield.value = dbid;
+        })
+    }
+</script>
+{% endblock %}
