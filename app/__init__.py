@@ -3,7 +3,7 @@ from datetime import datetime, date, timedelta
 from app.models import db, mentorlog, slots
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.sqlite3"
-app.config['SECRET_KEY'] = '85685fdd5ecc6a95b38d17fc'
+app.config['SECRET_KEY'] = 'secret'
 db.init_app(app)
 
 with app.app_context():
